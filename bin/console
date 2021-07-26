@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+
+/* eslint-disable import/no-unresolved */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable import/extensions */
+/* eslint-disable no-console */
+/* eslint-disable global-require */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
+const fs = require('fs');
+
+function checkFileExistsSync(filepath) {
+  let flag = true;
+  try {
+    fs.accessSync(filepath, fs.constants.F_OK);
+  } catch (e) {
+    flag = false;
+  }
+  return flag;
+}
+
+// TODO: Hapus aja mode development test, karena sudah bisa overrideExitCode
+
+// custom a argument to force run code from src
+const argIndex = process.argv.indexOf('--dev-test');
+const isDev = argIndex !== 1;
+
+if (isDev) process.argv.splice(argIndex, 1);
+
+if (isDev) {
+  require('ts-node').register({
+    transpileOnly: true,
+    require: ['tsconfig-paths/register'],
+  });
+  require('../src/console');
+} else if (!checkFileExistsSync('../dist/src/console.js')) {
+  console.log('PLEASE BUILD THE CLI PROJECT FIRST');
+  console.log('Run command: `npm run build`');
+  return process.exit();
+} else {
+  require('../dist/src/console.js');
+}
+
+return null;

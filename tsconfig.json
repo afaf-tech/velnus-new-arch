@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2015",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2016",
+      "dom"
+    ],
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@config": [
+        "src/config"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@schemas": [
+        "src/schemas"
+      ]
+    }
+  },
+  "include": [
+    "**/src/**/*.ts",
+    ".eslintrc.js",
+    "./bin/console"
+  ],
+  "exclude": [
+    "./node_modules",
+    "./dist"
+  ]
+}
