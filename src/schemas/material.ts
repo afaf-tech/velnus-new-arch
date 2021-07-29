@@ -25,15 +25,6 @@ export class Material {
   })
   cost: number;
 
-  @ApiProperty({
-    description: 'Material selling price',
-    example: '45000.00',
-    type: Number,
-    format: 'decimal',
-    multipleOf: 0.01,
-  })
-  price: number;
-
   @ApiProperty({ description: 'Material created date' })
   createdAt: Date;
 
@@ -83,19 +74,6 @@ export class CreateMaterial {
     multipleOf: 0.01,
   })
   cost = 0.0;
-
-  @Expose()
-  @Type(() => Number)
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @ApiPropertyOptional({
-    description: 'Material selling price',
-    type: Number,
-    example: '5000.00',
-    format: 'decimal',
-    multipleOf: 0.01,
-  })
-  price = 0.0;
 }
 
 @Exclude()
@@ -141,19 +119,6 @@ export class UpdateMaterial {
     multipleOf: 0.01,
   })
   cost = 0.0;
-
-  @Expose()
-  @Type(() => Number)
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @ApiPropertyOptional({
-    description: 'Material selling price',
-    type: Number,
-    example: '45000.00',
-    format: 'decimal',
-    multipleOf: 0.01,
-  })
-  price = 0.0;
 }
 
 /**

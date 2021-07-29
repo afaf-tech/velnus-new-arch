@@ -16,6 +16,7 @@ import { InvoiceEntity } from '../invoice/invoice.entity';
 import { ProductEntity } from '../product/product.entity';
 import { SettingEntity } from '../setting/setting.entity';
 import { OrderEntity } from '../order/order.entity';
+import { CreditEntity } from '../credit/credit.entity';
 
 @Entity('stores')
 export class StoreEntity extends CommonEntity {
@@ -64,6 +65,9 @@ export class StoreEntity extends CommonEntity {
 
   @OneToMany(() => CustomerEntity, customer => customer.store)
   customers: CustomerEntity[];
+
+  @OneToMany(() => CreditEntity, credits => credits.store)
+  credits: CreditEntity[];
 
   @OneToMany(() => SettingEntity, setting => setting.store)
   setting: SettingEntity[];

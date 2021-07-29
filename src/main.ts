@@ -59,7 +59,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(logger));
   app.useLogger(logger);
 
-  app.use(urlencoded({ limit: '50mb', extended: false }));
+  app.use(urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) {

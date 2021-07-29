@@ -29,6 +29,9 @@ export class ProductEntity extends CommonEntity {
   @Column({ type: 'text' })
   description: string;
 
+  @Column({ precision: 11, transformer: ColumnNumericTransformer, default: 0 })
+  stock: number;
+
   @Column('decimal', {
     precision: 16,
     scale: 2,
@@ -36,6 +39,14 @@ export class ProductEntity extends CommonEntity {
     transformer: ColumnNumericTransformer,
   })
   cost: number;
+
+  @Column('decimal', {
+    precision: 16,
+    scale: 2,
+    default: 0,
+    transformer: ColumnNumericTransformer,
+  })
+  price: number;
 
   @Column('decimal', {
     precision: 16,

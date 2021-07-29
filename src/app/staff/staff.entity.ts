@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { CommonEntity, ColumnNumericTransformer } from '@common/database';
 import { StaffRoleEntity } from '@app/staff-role/staff-role.entity';
 import { TransactionEntity } from '@app/transaction/transaction.entity';
+import { CreditEntity } from '@app/credit/credit.entity';
 import { StoreEntity } from '../store/store.entity';
 import { StaffPosition } from './staff.constants';
 
@@ -72,6 +74,9 @@ export class StaffEntity extends CommonEntity {
 
   @ManyToMany(() => TransactionEntity, transaction => transaction.staff)
   transactions: TransactionEntity[];
+
+  @OneToMany(() => CreditEntity, credits => credits.admin)
+  credits: CreditEntity[];
 
   @BeforeInsert()
   @BeforeUpdate()

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Brackets, DeleteResult, Repository } from 'typeorm';
+import { Brackets, DeleteResult, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMaterial, GetFilterMaterialQuery } from '@schemas';
 import { isEmpty } from 'lodash';
@@ -97,6 +97,10 @@ export class MaterialService {
     }
 
     return query.getMany();
+  }
+
+  async getByIds(ids: number[]): Promise<MaterialEntity[]> {
+    return this.materialRepository.find({ id: In(ids) });
   }
 
   create(data: CreateMaterial): Promise<MaterialEntity> {

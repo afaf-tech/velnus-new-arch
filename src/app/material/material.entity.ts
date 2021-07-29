@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -31,14 +32,6 @@ export class MaterialEntity extends CommonEntity {
   })
   cost: number;
 
-  @Column('decimal', {
-    precision: 16,
-    scale: 2,
-    default: 0,
-    transformer: ColumnNumericTransformer,
-  })
-  price: number;
-
   @CreateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
@@ -53,16 +46,16 @@ export class MaterialEntity extends CommonEntity {
   updatedAt: Date;
 
   @ManyToMany(() => ProductEntity)
-  // @JoinTable({
-  //   name: 'product_material_items',
-  //   joinColumn: {
-  //     name: 'productMaterialId',
-  //     referencedColumnName: 'id',
-  //   },
-  //   inverseJoinColumn: {
-  //     name: 'productId',
-  //     referencedColumnName: 'id',
-  //   },
-  // })
+  @JoinTable({
+    name: 'product_materials',
+    joinColumn: {
+      name: 'materialId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'productId',
+      referencedColumnName: 'id',
+    },
+  })
   products: ProductEntity[];
 }
