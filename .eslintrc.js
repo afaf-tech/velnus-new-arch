@@ -36,6 +36,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 0,
     '@typescript-eslint/no-explicit-any': 0, // allow use any in types
     '@typescript-eslint/ban-types': 0, // allow write types like object, dll
+    'class-methods-use-this': 0,
   },
   overrides: [
     {
@@ -53,12 +54,6 @@ module.exports = {
       ],
       rules: {
         'max-classes-per-file': 0,
-      },
-    },
-    {
-      files: ['./src/**/*.command.ts'],
-      rules: {
-        'class-methods-use-this': 0,
       },
     },
     {

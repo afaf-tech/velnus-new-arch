@@ -1,4 +1,5 @@
 import { AuthGuard } from '@app/auth/auth.guard';
+import { StoreGuard } from '@app/auth/store.guard';
 import {
   Body,
   Controller,
@@ -78,7 +79,7 @@ export class StaffController {
 
 @ApiTags('Staffs')
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, StoreGuard)
 @Controller('/store/:storeId/staff')
 export class StaffInStoreController {
   constructor(private readonly staffService: StaffService) {}

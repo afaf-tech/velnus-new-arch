@@ -10,5 +10,5 @@ export interface Request extends BaseRequest {
   /**
    * Get the current user from the request object
    */
-  credential: AuthCredential;
+  user: AuthCredential;
 }

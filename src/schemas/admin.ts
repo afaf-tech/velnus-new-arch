@@ -24,6 +24,8 @@ export class Admin {
   @Expose()
   @ApiProperty()
   updatedAt!: Date;
+
+  storeId?: number;
 }
 
 @Exclude()

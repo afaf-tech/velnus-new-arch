@@ -1,6 +1,7 @@
 import { Request as HttpRequest } from '@common/http';
 import { Body, Controller, Get, Post, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiConsumes,
   ApiOkResponse,
   ApiOperation,
@@ -38,9 +39,10 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
+  @ApiBearerAuth('access-token')
   @Get('credential')
   // eslint-disable-next-line class-methods-use-this
   getCredential(@Request() req: HttpRequest) {
-    return classToPlain(req.credential);
+    return classToPlain(req.user);
   }
 }

@@ -19,7 +19,7 @@ import { JwtStrategy } from './jwt.strategy';
     StaffModule,
     StaffRoleModule,
     StoreModule,
-    PassportModule.register({ session: false, property: 'credential' }),
+    PassportModule.register({ session: false }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

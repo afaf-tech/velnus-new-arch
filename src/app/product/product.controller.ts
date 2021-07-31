@@ -1,4 +1,5 @@
 import { AuthGuard } from '@app/auth/auth.guard';
+import { StoreGuard } from '@app/auth/store.guard';
 import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateProduct, Product } from '@schemas';
@@ -6,7 +7,7 @@ import { plainToClass } from 'class-transformer';
 import { ProductService } from './product.service';
 
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, StoreGuard)
 @ApiTags('Products')
 @Controller(`store/:storeId/product`)
 export class ProductStoreController {

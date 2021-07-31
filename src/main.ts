@@ -35,7 +35,7 @@ async function bootstrap() {
   );
 
   const document = SwaggerModule.createDocument(app, config.build());
-  const whitelist = ['http://localhost:9000', 'http://localhost:3000'];
+  const whitelist = ['http://localhost:9000', 'http://localhost:3000', 'http://localhost:5000'];
 
   SwaggerModule.setup('docs', app, document, {
     // swaggerOptions: {
