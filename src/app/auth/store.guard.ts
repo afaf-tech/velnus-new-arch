@@ -23,7 +23,6 @@ import { LoginType } from './auth.constants';
 export class StoreGuard implements CanActivate {
   canActivate(context: ExecutionContext): Promise<boolean> | Observable<boolean> | boolean {
     const request: Request = context.switchToHttp().getRequest();
-    console.log(request);
     if (request.user.type !== LoginType.STAFF) {
       return false;
     }
