@@ -75,9 +75,15 @@ export class ProductService {
     return query.getMany();
   }
 
-  getOrFail(productId: number): Promise<ProductEntity> {
+  getOrFail(productId: number, storeId?: number): Promise<ProductEntity> {
+    let param = {};
+    if (storeId) {
+      param = { id: productId, storeId };
+    } else {
+      param = { id: productId };
+    }
     const queries: FindOneOptions<ProductEntity> = {
-      where: { id: productId },
+      where: param,
       relations: ['materials'],
     };
 

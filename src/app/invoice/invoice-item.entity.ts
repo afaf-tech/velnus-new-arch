@@ -27,7 +27,18 @@ export class InvoiceItemEntity extends CommonEntity {
     default: 0,
     transformer: ColumnNumericTransformer,
   })
-  amount: number;
+  amountEach: number;
+
+  @Column('decimal', {
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: ColumnNumericTransformer,
+  })
+  total: number;
+
+  @Column({ precision: 11, transformer: ColumnNumericTransformer })
+  quantity: number;
 
   @Column({ type: 'datetime', nullable: true })
   dueDate: Date;
@@ -36,7 +47,7 @@ export class InvoiceItemEntity extends CommonEntity {
   paymentMethod: string;
 
   @Column({ type: 'text' })
-  notes: string;
+  notes?: string;
 
   @CreateDateColumn({
     type: 'timestamp',

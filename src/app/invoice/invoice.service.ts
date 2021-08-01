@@ -1,7 +1,8 @@
 import { ErrorBase } from '@common/exceptions';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
+import { InvoiceItemEntity } from './invoice-item.entity';
 import { InvoiceEntity } from './invoice.entity';
 
 export interface GetWhereInvoiceOptions {
@@ -21,12 +22,12 @@ export interface GetManyInvoiceOptions extends GetWhereInvoiceOptions {
 
 export type CreateInvoice = Pick<
   InvoiceEntity,
-  'customerId' | 'subtotal' | 'total' | 'orderId' | 'storeId'
+  'customerId' | 'subtotal' | 'total' | 'orderId' | 'storeId' | 'invoiceItems'
 > &
   Partial<
     Pick<
       InvoiceEntity,
-      'date' | 'dueDate' | 'paidDate' | 'dateRefunded' | 'dateCancelled' | 'notes'
+      'date' | 'dueDate' | 'paidDate' | 'dateRefunded' | 'dateCancelled' | 'notes' | 'status'
     >
   >;
 
@@ -35,10 +36,16 @@ export class InvoiceService {
   constructor(
     @InjectRepository(InvoiceEntity)
     private readonly invoiceRepository: Repository<InvoiceEntity>,
+    @InjectRepository(InvoiceItemEntity)
+    private readonly invoiceItemRepository: Repository<InvoiceItemEntity>,
   ) {}
 
   get repository(): Repository<InvoiceEntity> {
     return this.invoiceRepository;
+  }
+
+  get invoiceItemRepo(): Repository<InvoiceItemEntity> {
+    return this.invoiceItemRepository;
   }
 
   async get(invoiceId: number, options: GetInvoiceOptions): Promise<InvoiceEntity> {
@@ -66,5 +73,10 @@ export class InvoiceService {
 
   async getMany() {
     return this.repository.find();
+  }
+
+  async create(data: CreateInvoice, entityManager: EntityManager): Promise<InvoiceEntity> {
+    const entity = this.invoiceRepository.create(data);
+    return entityManager.save(entity);
   }
 }
