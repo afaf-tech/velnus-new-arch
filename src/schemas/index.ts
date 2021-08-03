@@ -8,3 +8,4 @@ export * from './transaction';
 export * from './product';
 export * from './order';
 export * from './invoice-item';
+export * from './customer';

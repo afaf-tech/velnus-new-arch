@@ -1,7 +1,7 @@
 import { OrderStatusEnum } from '@app/order/order.constant';
 import { PaymentMethodEnum, PaymentTypeEnum } from '@app/payment-method/payment-method-enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Exclude, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
 
 export class Order {

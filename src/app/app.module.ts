@@ -20,6 +20,7 @@ import { ProductFileModule } from './product-file';
 import ProductModule from './product';
 import TransactionModule from './transaction';
 import { OrderModule } from './order/order.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { OrderModule } from './order/order.module';
     ConsoleModule,
     StoreModule,
     OrderModule,
+    CustomerModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
