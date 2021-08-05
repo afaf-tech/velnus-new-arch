@@ -1,16 +1,31 @@
 import { InvoiceItemEntity } from '@app/invoice/invoice-item.entity';
+import { InvoiceStatusEnum } from '@app/invoice/invoice.constant';
 import { InvoiceService } from '@app/invoice/invoice.service';
 import { PaymentMethodEnum } from '@app/payment-method/payment-method-enum';
 import { ProductService } from '@app/product/product.service';
-import { Injectable } from '@nestjs/common';
+import { ErrorBase } from '@common/exceptions';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateInvoiceItem } from '@schemas';
-import { CreateOrder } from 'src/schemas/order';
-import { Connection, Repository } from 'typeorm';
+import { isNotEmpty } from 'class-validator';
+import { endOfDay, parseISO, startOfDay } from 'date-fns';
+import { isEmpty } from 'lodash';
+import { CreateOrder, OrderColumnSearch } from 'src/schemas/order';
+import { Brackets, Connection, EntityNotFoundError, FindOneOptions, Repository } from 'typeorm';
 import { OrderStatusEnum } from './order.constant';
 import { OrderEntity } from './order.entity';
 
 export type ICreateOrder = Omit<OrderEntity, 'createdAt' | 'updatedAt' | 'store' | 'id'>;
+
+export interface GetOrderOptions {
+  fail?: boolean;
+  storeId?: number;
+}
+export interface GetManyOrderOptions extends GetOrderOptions {
+  globalSearch?: string;
+  columnSearch?: { [x in keyof OrderColumnSearch]: string };
+  createdDateRange?: string[];
+}
 
 @Injectable()
 export class OrderService {
@@ -20,6 +35,72 @@ export class OrderService {
     private readonly productService: ProductService,
     private readonly invoiceService: InvoiceService,
   ) {}
+
+  getMany(options: GetManyOrderOptions = {}): Promise<OrderEntity[]> {
+    const query = this.orderRepository.createQueryBuilder('order');
+
+    if (options.storeId) {
+      query.where('order.storeId = :storeId', { storeId: options.storeId });
+    }
+
+    if (options?.columnSearch) {
+      query.andWhere(
+        new Brackets(qb => {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const [key, value] of Object.entries(options.columnSearch)) {
+            if (!isNotEmpty(value)) {
+              qb.andWhere(`order.${key} = :value`, { key, value });
+            }
+          }
+        }),
+      );
+    }
+
+    if (!isEmpty(options?.globalSearch)) {
+      query.andWhere(
+        new Brackets(qb => {
+          qb.where('order.name LIKE :orderNum', { orderNum: `%${options.globalSearch}%` });
+        }),
+      );
+    }
+
+    if (options?.createdDateRange && options?.createdDateRange.length) {
+      const range = options.createdDateRange;
+      const startDate = startOfDay(parseISO(range[0]));
+      const endDate = endOfDay(parseISO(range[1]));
+
+      query.andWhere('order.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    }
+
+    return query.getMany();
+  }
+
+  getOrFail(orderId: number, storeId?: number): Promise<OrderEntity> {
+    let param = {};
+    if (storeId) {
+      param = { id: orderId, storeId };
+    } else {
+      param = { id: orderId };
+    }
+    const queries: FindOneOptions<OrderEntity> = {
+      where: param,
+      relations: ['invoice'],
+    };
+
+    try {
+      return this.orderRepository.findOneOrFail(queries);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(
+          new ErrorBase('Ups... Someting was wrong', {
+            devMessage: `Store #${orderId} doest not exist`,
+          }),
+        );
+      } else {
+        throw error;
+      }
+    }
+  }
 
   async createOrder(data: CreateOrder): Promise<OrderEntity> {
     let totalAmount = 0;
@@ -67,7 +148,7 @@ export class OrderService {
           customerId: data.customerId,
           subtotal: totalAmount,
           total: totalAmount,
-          status: 'UNPAID',
+          status: InvoiceStatusEnum.Unpaid,
           orderId: orderSave.id,
           storeId: data.storeId,
           date: timeNow,

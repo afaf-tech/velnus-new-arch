@@ -28,6 +28,14 @@ export class CustomerStoreController {
     return entities.map(entity => plainToClass(Customer, entity));
   }
 
+  @ApiOperation({ description: 'Get customer data' })
+  @ApiOkResponse({ type: Customer })
+  @Get('/:customerId')
+  async get(@Param('customerId', ParseIntPipe) customerId: number): Promise<Customer> {
+    const entity = await this.customerService.getOrFail(customerId);
+    return plainToClass(Customer, entity);
+  }
+
   @ApiConsumes('application/x-www-form-urlencoded')
   @ApiOperation({
     description: 'Create new material item',

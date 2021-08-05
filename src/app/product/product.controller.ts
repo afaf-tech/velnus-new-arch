@@ -19,7 +19,7 @@ export class ProductStoreController {
     return entities.map(entity => plainToClass(Product, entity));
   }
 
-  @ApiOperation({ description: 'Get store data' })
+  @ApiOperation({ description: 'Get Product data' })
   @ApiOkResponse({ type: Product })
   @Get('/:productId')
   async get(@Param('productId', ParseIntPipe) productId: number): Promise<Product> {
@@ -29,7 +29,7 @@ export class ProductStoreController {
 
   @ApiConsumes('application/x-www-form-urlencoded')
   @ApiOperation({
-    description: 'Create new material item',
+    description: 'Create new Product item',
   })
   @Post('/')
   async createProduct(

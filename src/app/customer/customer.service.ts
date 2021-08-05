@@ -27,8 +27,6 @@ export class CustomerService {
     searchQuery.search(customerColumnSearch, options.globalSearch);
     searchQuery.filter(options.columnSearch);
     searchQuery.dateRange('createdAt', options.dateRange);
-    console.log(searchQuery);
-    
     return query.getMany();
   }
 

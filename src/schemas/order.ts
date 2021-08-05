@@ -1,8 +1,10 @@
-import { OrderStatusEnum } from '@app/order/order.constant';
+import { orderColumnSearch, OrderStatusEnum } from '@app/order/order.constant';
+import { OrderEntity } from '@app/order/order.entity';
 import { PaymentMethodEnum, PaymentTypeEnum } from '@app/payment-method/payment-method-enum';
-import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { IsDateRange } from '@common/validators';
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class Order {
   @Expose()
@@ -98,4 +100,62 @@ export class CreateOrder {
   products: CreateOrderProduct[];
 
   storeId: number;
+}
+/**
+ * Don't forget every place `GetFilterProductQuerty`, set in property `filter`!
+ */
+@Exclude()
+export class GetFilterOrderQuery {
+  @Expose()
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ name: 'filter[orderNum]' })
+  orderNum!: string;
+
+  @Expose()
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    name: 'filter[status]',
+    description: Object.values(OrderStatusEnum).join(' | '),
+    enum: OrderStatusEnum,
+  })
+  status!: string;
+}
+
+/**
+ * Where colum allowing to search
+ */
+export type OrderColumnSearch = Pick<OrderEntity, 'orderNum' | 'status'>;
+
+@Exclude()
+export class GetOrderQuery {
+  @Expose()
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: `Filter by ${orderColumnSearch.join(',')}` })
+  search!: string;
+
+  @Expose()
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => GetFilterOrderQuery)
+  @ApiPropertyOptional({ type: () => GetFilterOrderQuery })
+  filter!: GetFilterOrderQuery;
+
+  @Expose()
+  @IsOptional()
+  @IsDateRange()
+  @ApiPropertyOptional({ example: '2020-07-06_2022-07-06' })
+  rangedate!: string;
+}
+
+@Exclude()
+export class GetOrderQueryInStore extends OmitType(GetOrderQuery, ['filter'] as const) {
+  @Expose()
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => GetFilterOrderQuery)
+  @ApiPropertyOptional({ type: () => GetFilterOrderQuery })
+  filter!: GetFilterOrderQuery;
 }
