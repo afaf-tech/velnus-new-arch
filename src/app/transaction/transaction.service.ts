@@ -1,8 +1,19 @@
+import { CreditService } from '@app/credit/credit.service';
+import { InvoiceStatusEnum } from '@app/invoice/invoice.constant';
+import { InvoiceService } from '@app/invoice/invoice.service';
+import { PaymentMethodEnum, PaymentTypeEnum } from '@app/payment-method/payment-method-enum';
 import { ErrorBase } from '@common/exceptions';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateTransactionInStore, PayTransactionOrder } from '@schemas';
 import { isEmpty, omitBy } from 'lodash';
-import { Brackets, DeleteResult, EntityManager, Repository } from 'typeorm';
+import { Brackets, DeleteResult, EntityManager, Repository, Connection } from 'typeorm';
 import { TransactionEntity } from './transaction.entity';
 
 export interface GetWhereTransactionOptions {
@@ -46,8 +57,11 @@ export type UpdateTransactionOptions = CreateTransactionOptions;
 @Injectable()
 export class TransactionService {
   constructor(
+    private connection: Connection,
     @InjectRepository(TransactionEntity)
     private readonly transactionRepository: Repository<TransactionEntity>,
+    private readonly invoiceService: InvoiceService,
+    private readonly creditService: CreditService,
   ) {}
 
   get repository(): Repository<TransactionEntity> {
@@ -120,7 +134,92 @@ export class TransactionService {
     return query.getMany();
   }
 
-  create(data: CreateTransaction) {
+  async create(data: CreateTransaction) {
+    const entity = this.transactionRepository.create();
+    // Solve object key ordering issues
+    const insert = { id: undefined, ...data };
+    Object.assign(entity, insert);
+    return this.transactionRepository.save(entity);
+  }
+
+  async payTransactionOrder(data: PayTransactionOrder) {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    let transactionSave: TransactionEntity;
+    try {
+      const invoice = await this.invoiceService.getOrFail(data.invoiceId);
+      // cek status paid
+      if (invoice.status === InvoiceStatusEnum.Paid) {
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_IMPLEMENTED,
+            error: 'Order has already been purchased',
+          },
+          HttpStatus.NOT_IMPLEMENTED,
+        );
+      }
+
+      // cek if money more than or equal to total required;
+      if (data.amountIn < invoice.total) {
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_IMPLEMENTED,
+            error: `Amount less than ${invoice.total}`,
+          },
+          HttpStatus.NOT_IMPLEMENTED,
+        );
+      }
+      transactionSave = this.transactionRepository.create({
+        amountIn: data.amountIn,
+        invoiceId: data.invoiceId,
+        staffId: data.staffId,
+        gateway: PaymentMethodEnum.BankTransfer,
+        description: `pay invoice ${invoice.id}`,
+      });
+
+      transactionSave = await queryRunner.manager.save(transactionSave);
+
+      if (data.amountIn > invoice.total) {
+        await this.creditService.create(
+          {
+            description: `invoice id ${invoice.id}`,
+            total: invoice.total,
+            storeId: data.storeId,
+            adminId: data.staffId,
+            invoiceId: invoice.id,
+            transactionId: transactionSave.id,
+          },
+          { entityManager: queryRunner.manager },
+        );
+      }
+
+      invoice.paidDate = new Date();
+      invoice.status = InvoiceStatusEnum.Paid;
+
+      /* TODO:  ada 2 metode pembayaran di toko . yang pertama langsung ke manager , 
+      yang kedua ke rekening velnus...
+
+        apabila ke manager, maka tidak menambahkan deposit toko.
+      tapi apabila ke rekening velnus akan menambahkan deposit pada manager itu sendiri 
+      karena nanti akan diserah kan ke velnus oleh manager itu sendiri */
+      if (invoice.paymentMethod === PaymentTypeEnum.ToVelnus) {
+        await this.creditService.create(
+          {
+            description: `invoice id ${invoice.id}`,
+            total: invoice.total,
+            storeId: data.storeId,
+            adminId: data.staffId,
+            invoiceId: invoice.id,
+          },
+          { entityManager: queryRunner.manager },
+        );
+      }
+      await queryRunner.manager.save(invoice);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    }
     const entity = this.transactionRepository.create();
     // Solve object key ordering issues
     const insert = { id: undefined, ...data };

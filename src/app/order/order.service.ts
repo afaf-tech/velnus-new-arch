@@ -158,8 +158,9 @@ export class OrderService {
         },
         queryRunner.manager,
       );
-    } catch (error) {
       await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
       if (error) {
         throw error;
       }

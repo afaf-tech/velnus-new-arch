@@ -84,8 +84,33 @@ export class CreateTransaction extends OmitType(Transaction, [
   'updatedAt',
 ] as const) {}
 
-export class CreateTransactionInStore extends OmitType(CreateTransaction, ['storeId'] as const) {}
+export class CreateTransactionInStore extends CreateTransaction {}
 
+export class PayTransactionOrder {
+  @Expose()
+  @Type(() => Number)
+  @IsNotEmpty()
+  @IsNumber({ maxDecimalPlaces: 0 })
+  @ApiProperty({ description: 'invoiceId' })
+  invoiceId: number;
+
+  @Expose()
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @ApiProperty({
+    description: 'amount of total order',
+    type: Number,
+    example: '30000.00',
+    format: 'decimal',
+    multipleOf: 0.01,
+  })
+  amountIn: number;
+
+  staffId: number;
+
+  storeId: number;
+}
 @Exclude()
 export class GetTransactionFilterQuery {
   @Expose()

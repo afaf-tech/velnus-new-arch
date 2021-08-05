@@ -92,6 +92,8 @@ export class CreateProduct {
   materialids: string[];
 
   storeId: number;
+
+  adminId: number;
 }
 
 /**

@@ -30,7 +30,10 @@ export class CreditEntity extends CommonEntity {
   invoiceId?: number;
 
   @Column({ nullable: true, transformer: ColumnNumericTransformer })
-  productId: number;
+  transactionId?: number;
+
+  @Column({ nullable: true, transformer: ColumnNumericTransformer })
+  productId?: number;
 
   @ManyToOne(() => StoreEntity, store => store.credits, { nullable: false })
   store: StoreEntity;

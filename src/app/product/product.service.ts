@@ -144,7 +144,7 @@ export class ProductService {
           description: `create ${data.stock} product ${data.name}`,
           total: -totalDeposite,
           storeId: data.storeId,
-          adminId: 1,
+          adminId: data.adminId,
           productId: productSave.id,
         },
         { entityManager: queryRunner.manager },

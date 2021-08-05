@@ -9,10 +9,12 @@ import {
   Post,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
-import { CreateTransaction, GetTransactionQuery, Transaction } from '@schemas';
+import { CreateTransaction, GetTransactionQuery, PayTransactionOrder, Transaction } from '@schemas';
+import { Request as HttpRequest } from '@common/http';
 import { GetManyTransactionOptions, TransactionService } from './transaction.service';
 
 @ApiTags('Transactions')
@@ -35,6 +37,7 @@ export class TransactionController {
 
   @Post('/')
   async create(@Body() body: CreateTransaction): Promise<Transaction> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const entity = await this.transactionService.create(body);
     return plainToClass(Transaction, entity);
   }
@@ -79,6 +82,19 @@ export class TransactionInStoreController {
     @Param('transactionId', ParseIntPipe) transactionId: number,
   ): Promise<Transaction> {
     const entity = await this.transactionService.get(transactionId, { fail: true, storeId });
+    return plainToClass(Transaction, entity);
+  }
+
+  @Post('/')
+  async create(
+    @Param('storeId', ParseIntPipe) storeId: number,
+    @Body() body: PayTransactionOrder,
+    @Request() req: HttpRequest,
+  ): Promise<Transaction> {
+    body.staffId = Number(req.user.account.id);
+    body.storeId = storeId;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const entity = await this.transactionService.payTransactionOrder(body);
     return plainToClass(Transaction, entity);
   }
 

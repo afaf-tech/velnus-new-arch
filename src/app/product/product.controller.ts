@@ -1,10 +1,21 @@
 import { AuthGuard } from '@app/auth/auth.guard';
 import { StoreGuard } from '@app/auth/store.guard';
-import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateProduct, Product } from '@schemas';
 import { plainToClass } from 'class-transformer';
+import { Request as HttpRequest } from '@common/http';
 import { ProductService } from './product.service';
+
 
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard, StoreGuard)
@@ -35,8 +46,11 @@ export class ProductStoreController {
   async createProduct(
     @Param('storeId', ParseIntPipe) storeId: number,
     @Body() body: CreateProduct,
+    @Request() req: HttpRequest,
   ): Promise<Product> {
     body.storeId = storeId;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    body.adminId = Number(req.user.account.id);
     const entity = await this.productService.create(body);
     return plainToClass(Product, entity);
   }
