@@ -170,3 +170,50 @@ export class CreateCustomer {
 
   storeId: number;
 }
+
+export class UpdateCustomerInStore {
+  @Expose()
+  @IsOptional()
+  @ApiPropertyOptional()
+  name!: string;
+
+  @Expose()
+  @IsOptional()
+  @ApiPropertyOptional()
+  phoneNumber: string;
+
+  @Expose()
+  @Type(() => String)
+  // @IsEmail()
+  @IsOptional()
+  @ApiPropertyOptional()
+  email: string;
+
+  @Expose()
+  @IsOptional()
+  @ApiPropertyOptional()
+  password!: string;
+
+  @Expose()
+  @Type(() => String)
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  address: string;
+
+  @Expose()
+  @Type(() => String)
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  kabupaten: string;
+
+  @Expose()
+  @Type(() => String)
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  provinsi: string;
+
+  storeId: number;
+}

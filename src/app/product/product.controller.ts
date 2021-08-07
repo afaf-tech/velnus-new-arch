@@ -16,7 +16,6 @@ import { plainToClass } from 'class-transformer';
 import { Request as HttpRequest } from '@common/http';
 import { ProductService } from './product.service';
 
-
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard, StoreGuard)
 @ApiTags('Products')
@@ -40,7 +39,7 @@ export class ProductStoreController {
 
   @ApiConsumes('application/x-www-form-urlencoded')
   @ApiOperation({
-    description: 'Create new Product item',
+    summary: 'Create new Product',
   })
   @Post('/')
   async createProduct(

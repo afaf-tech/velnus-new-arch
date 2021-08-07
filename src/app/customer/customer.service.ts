@@ -3,10 +3,22 @@ import { ErrorBase } from '@common/exceptions';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, EntityNotFoundError, Repository } from 'typeorm';
+import { omit } from 'lodash';
+import {
+  DeleteResult,
+  EntityManager,
+  EntityNotFoundError,
+  FindConditions,
+  In,
+  Repository,
+} from 'typeorm';
 import { customerColumnSearch } from './customer.constant';
 import { CustomerEntity } from './customer.entity';
-import { CustomerServiceGetManyOptions, ICreateCustomer } from './customer.interface';
+import {
+  CustomerServiceGetManyOptions,
+  ICreateCustomer,
+  IUpdateCustomer,
+} from './customer.interface';
 
 @Injectable()
 export class CustomerService {
@@ -45,7 +57,7 @@ export class CustomerService {
       if (error instanceof EntityNotFoundError) {
         throw new NotFoundException(
           new ErrorBase('Ups... Someting was wrong', {
-            devMessage: `Store #${customerId} doest not exist`,
+            devMessage: `Customer #${customerId} doest not exist`,
           }),
         );
       } else {
@@ -96,5 +108,37 @@ export class CustomerService {
       }
     }
     return customerEntity;
+  }
+
+  async update(customerId: number, data: IUpdateCustomer): Promise<CustomerEntity> {
+    const currentEntity = await this.getOrFail(customerId, data.storeId);
+    const newEntity = this.customerRepository.create(omit(currentEntity, ['password']));
+    Object.assign(newEntity, data);
+
+    return this.customerRepository.save(newEntity);
+  }
+
+  async remove(customerId: number, options?: { storeId: number }): Promise<CustomerEntity> {
+    const entity = await this.getOrFail(customerId, options?.storeId);
+    return this.customerRepository.remove(entity);
+  }
+
+  async delete(
+    customerId: number | number[],
+    options?: { storeId: number },
+  ): Promise<DeleteResult> {
+    const where: FindConditions<CustomerEntity> = {};
+
+    if (Array.isArray(customerId)) {
+      where.id = In(customerId);
+    } else {
+      where.id = customerId;
+    }
+
+    if ('storeId' in options) {
+      where.storeId = options.storeId;
+    }
+
+    return this.customerRepository.delete(where);
   }
 }

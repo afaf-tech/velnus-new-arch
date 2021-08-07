@@ -11,7 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTransactionInStore, PayTransactionOrder } from '@schemas';
+import { PayTransactionOrder } from '@schemas';
 import { isEmpty, omitBy } from 'lodash';
 import { Brackets, DeleteResult, EntityManager, Repository, Connection } from 'typeorm';
 import { TransactionEntity } from './transaction.entity';

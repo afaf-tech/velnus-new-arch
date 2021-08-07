@@ -11,10 +11,11 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
 import { CreateTransaction, GetTransactionQuery, PayTransactionOrder, Transaction } from '@schemas';
 import { Request as HttpRequest } from '@common/http';
+import { StoreGuard } from '@app/auth/store.guard';
 import { GetManyTransactionOptions, TransactionService } from './transaction.service';
 
 @ApiTags('Transactions')
@@ -56,7 +57,7 @@ export class TransactionController {
 
 @ApiTags('Transactions')
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, StoreGuard)
 @Controller('/:storeId/transaction')
 export class TransactionInStoreController {
   constructor(private readonly transactionService: TransactionService) {}
@@ -85,6 +86,10 @@ export class TransactionInStoreController {
     return plainToClass(Transaction, entity);
   }
 
+  @ApiConsumes('application/x-www-form-urlencoded')
+  @ApiOperation({
+    summary: 'Transaction Order',
+  })
   @Post('/')
   async create(
     @Param('storeId', ParseIntPipe) storeId: number,
