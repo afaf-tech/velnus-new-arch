@@ -26,6 +26,8 @@ export class Admin {
   updatedAt!: Date;
 
   storeId?: number;
+
+  roleId?: number;
 }
 
 @Exclude()
