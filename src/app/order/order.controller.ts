@@ -5,10 +5,12 @@ import { ApiBearerAuth, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from
 import { plainToClass } from 'class-transformer';
 import { CreateOrder, GetOrderQueryInStore } from 'src/schemas/order';
 import { Order } from '@schemas';
+import { PermissionGuard } from '@app/auth/permission.guard';
+import { Permission } from '@common/decorators/permission.decorator';
 import { OrderService } from './order.service';
 
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard, StoreGuard)
+@UseGuards(AuthGuard, StoreGuard, PermissionGuard)
 @ApiTags('Orders')
 @Controller(`store/:storeId/order`)
 export class OrderStoreController {
@@ -16,6 +18,7 @@ export class OrderStoreController {
 
   @ApiOperation({ summary: 'Get Orders in store' })
   @ApiOkResponse({ type: [Order] })
+  @Permission('order.list')
   @Get('/')
   async getMany(
     @Param('storeId', ParseIntPipe) storeId: number,
@@ -32,6 +35,7 @@ export class OrderStoreController {
 
   @ApiOperation({ description: 'Get Product data' })
   @ApiOkResponse({ type: Order })
+  @Permission('order.get')
   @Get('/:orderId')
   async get(@Param('orderId', ParseIntPipe) orderId: number): Promise<Order> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -44,6 +48,7 @@ export class OrderStoreController {
     description: 'Create order',
   })
   @ApiOkResponse({ type: Order })
+  @Permission('order.create')
   @Post()
   async createOrder(@Param('storeId') storeId: number, @Body() body: CreateOrder): Promise<Order> {
     // eslint-disable-next-line no-console

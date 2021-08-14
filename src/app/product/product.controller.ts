@@ -14,16 +14,19 @@ import { ApiBearerAuth, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from
 import { CreateProduct, Product } from '@schemas';
 import { plainToClass } from 'class-transformer';
 import { Request as HttpRequest } from '@common/http';
+import { PermissionGuard } from '@app/auth/permission.guard';
+import { Permission } from '@common/decorators/permission.decorator';
 import { ProductService } from './product.service';
 
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard, StoreGuard)
+@UseGuards(AuthGuard, StoreGuard, PermissionGuard)
 @ApiTags('Products')
 @Controller(`store/:storeId/product`)
 export class ProductStoreController {
   constructor(private readonly productService: ProductService) {}
 
   @Get('/')
+  @Permission('product.list')
   async getMany(@Param('storeId', ParseIntPipe) storeId: number): Promise<Product[]> {
     const entities = await this.productService.getMany({ storeId });
     return entities.map(entity => plainToClass(Product, entity));
@@ -31,6 +34,7 @@ export class ProductStoreController {
 
   @ApiOperation({ description: 'Get Product data' })
   @ApiOkResponse({ type: Product })
+  @Permission('product.get')
   @Get('/:productId')
   async get(@Param('productId', ParseIntPipe) productId: number): Promise<Product> {
     const entity = await this.productService.getOrFail(productId);
@@ -41,6 +45,7 @@ export class ProductStoreController {
   @ApiOperation({
     summary: 'Create new Product',
   })
+  @Permission('product.create')
   @Post('/')
   async createProduct(
     @Param('storeId', ParseIntPipe) storeId: number,

@@ -1,5 +1,7 @@
 import { AuthGuard } from '@app/auth/auth.guard';
+import { PermissionGuard } from '@app/auth/permission.guard';
 import { StoreGuard } from '@app/auth/store.guard';
+import { Permission } from '@common/decorators/permission.decorator';
 import {
   Body,
   Controller,
@@ -79,13 +81,14 @@ export class StaffController {
 
 @ApiTags('Staffs')
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard, StoreGuard)
+@UseGuards(AuthGuard, StoreGuard, PermissionGuard)
 @Controller('/store/:storeId/staff')
 export class StaffInStoreController {
   constructor(private readonly staffService: StaffService) {}
 
   @ApiOperation({ summary: 'Get staffs in store' })
   @ApiOkResponse({ type: [Staff] })
+  @Permission('staff.list')
   @Get('/')
   async getMany(
     @Param('storeId', ParseIntPipe) storeId: number,
@@ -102,6 +105,7 @@ export class StaffInStoreController {
   @ApiConsumes('application/x-www-form-urlencoded')
   @ApiOperation({ summary: 'Create new staff in store' })
   @ApiOkResponse({ type: Staff })
+  @Permission('staff.create')
   @Post('/')
   async create(@Param('storeId') storeId: number, @Body() body: CreateStaffInStore) {
     const entity = await this.staffService.create({ ...body, storeId }, { storeId });
@@ -111,6 +115,7 @@ export class StaffInStoreController {
   @ApiOperation({ summary: 'Get staff in store' })
   @ApiOkResponse({ type: Staff })
   @Get('/:staffId')
+  @Permission('staff.get')
   async get(
     @Param('storeId', ParseIntPipe) storeId: number,
     @Param('staffId', ParseIntPipe) staffId: number,
@@ -122,6 +127,7 @@ export class StaffInStoreController {
   @ApiConsumes('application/x-www-form-urlencoded')
   @ApiOperation({ summary: 'Update staff in store' })
   @ApiOkResponse({ type: Staff })
+  @Permission('staff.update')
   @Put('/:staffId')
   async update(
     @Param('storeId', ParseIntPipe) storeId: number,
@@ -133,6 +139,7 @@ export class StaffInStoreController {
   }
 
   @ApiOperation({ summary: 'Delete staff in store' })
+  @Permission('staff.delete')
   @Delete('/:staffId')
   delete(@Param('storeId') storeId: number, @Param('staffId', ParseIntPipe) staffId: number) {
     return this.staffService.delete(staffId, { storeId });
