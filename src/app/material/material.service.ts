@@ -39,8 +39,11 @@ export class MaterialService {
     query.where('material.id = :materialId', { materialId });
 
     if (options.storeId) {
-      query.innerJoin('material.products', 'product');
-      query.where('material.product.storeId = :storeId', { storeId: options.storeId });
+      query
+        .leftJoinAndSelect('material.products', 'product')
+        .where('product.materialId = :materialId', { materialId });
+
+      // query.where('material.product.storeId = :storeId', { storeId: options.storeId });
     }
 
     const entity = await query.getOne();
@@ -61,7 +64,8 @@ export class MaterialService {
 
     if (options.storeId) {
       query.innerJoin('material.products', 'product');
-      query.where('material.product.storeId = :storeId', { storeId: options.storeId });
+      // material doesn't have store relation
+      // query.where('material.product.storeId = :storeId', { storeId: options.storeId });
     }
 
     if (options?.columnSearch) {

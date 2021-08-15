@@ -17,6 +17,7 @@ export interface GetManyProductOptions extends GetProductOptions {
   globalSearch?: string;
   columnSearch?: { [x in keyof GetFilterProductQuery]: string };
   createdDateRange?: string[];
+  materialId?: number;
 }
 @Injectable()
 export class ProductService {
@@ -62,6 +63,10 @@ export class ProductService {
           );
         }),
       );
+    }
+
+    if (!isEmpty(options?.materialId)) {
+      query.andWhere('product.materialId = :materialId', { materialId: options.materialId });
     }
 
     if (options?.createdDateRange && options?.createdDateRange.length) {
